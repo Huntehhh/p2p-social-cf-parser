@@ -18,6 +18,7 @@ import java.util.Map;
 @RestController
 public class Controller {
 
+    /*
     @PostMapping("/createSm")
     @ResponseStatus(HttpStatus.CREATED)
     public void createSm(@RequestBody String bodyString) throws JSONException {
@@ -25,6 +26,8 @@ public class Controller {
 
         System.out.println(json.get("lol"));
     }
+
+     */
 
     @GetMapping("/2parser")
     public Parser parser(@RequestParam(value = "cf") String cf) {
