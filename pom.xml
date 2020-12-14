@@ -34,18 +34,7 @@
 		<dependency>
 			<groupId>com.facebook.business.sdk</groupId>
 			<artifactId>facebook-java-business-sdk</artifactId>
-			<version>[8.0.3,)</version>
-		</dependency>
-		<dependency>
-			<groupId>com.facebook.business.sdk</groupId>
-			<artifactId>facebook-java-business-sdk</artifactId>
 			<version>9.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vaadin.external.google</groupId>
-			<artifactId>android-json</artifactId>
-			<version>0.0.20131108.vaadin1</version>
-			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 

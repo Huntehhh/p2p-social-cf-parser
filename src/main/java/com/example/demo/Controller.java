@@ -18,17 +18,6 @@ import java.util.Map;
 @RestController
 public class Controller {
 
-    /*
-    @PostMapping("/createSm")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void createSm(@RequestBody String bodyString) throws JSONException {
-        JSONObject json = convertToJson(bodyString);
-
-        System.out.println(json.get("lol"));
-    }
-
-     */
-
     @GetMapping("/2parser")
     public Parser parser(@RequestParam(value = "cf") String cf) {
         String[] strArr = cf.split(",", 2);
@@ -157,15 +146,5 @@ public class Controller {
                 .execute();
 
         return adCreative;
-    }
-
-    public JSONObject convertToJson(String json) {
-        try {
-            JSONObject jsonObject = new JSONObject(json);
-            return jsonObject;
-        }catch (JSONException err){
-            Log.debug("Error" + err.toString());
-        }
-        return null;
     }
 }
