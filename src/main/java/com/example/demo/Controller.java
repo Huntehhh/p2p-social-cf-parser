@@ -37,6 +37,7 @@ public class Controller {
     public CreateAd createAd(@RequestBody String bodyString) throws APIException, IOException, JSONException {
         //Convert request body to JSON object
         JSONObject json = convertToJson(bodyString);
+        json.put("bid_amount", "6000");
 
         //Declare Variables Pulled from JSON
         String ngo = json.get("ngo").toString();
