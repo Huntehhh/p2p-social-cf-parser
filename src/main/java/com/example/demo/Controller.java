@@ -17,12 +17,13 @@ import java.util.Map;
 @RestController
 public class Controller {
 
-    @PostMapping("/createSm")
+    @PostMapping("/testing")
     @ResponseStatus(HttpStatus.CREATED)
     public void createSm(@RequestBody String bodyString) throws JSONException {
         JSONObject json = convertToJson(bodyString);
 
         System.out.println(json.get("lol"));
+        System.out.println(json.get("lol2"));
     }
 
     @GetMapping("/2parser")
@@ -30,16 +31,17 @@ public class Controller {
         String[] strArr = cf.split(",", 2);
         return new Parser(strArr[0], strArr[1]);
     }
-    @GetMapping("/createAd")
-    public CreateAd createAd(@RequestParam(value = "params") String params) throws APIException, IOException {
-        Map<String, String> paramMap = parseParams(params);
-        APIContext context = new APIContext(paramMap.get("accesstoken"), paramMap.get("appsecret")).enableDebug(false);
-        AdAccount adAccount = new AdAccount("act_" + paramMap.get("adacctid"), context);
+    @PostMapping("/createSm")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CreateAd createAd(@RequestBody String bodyString) throws APIException, IOException, JSONException {
+        JSONObject json = convertToJson(bodyString);
+        APIContext context = new APIContext(json.get("accesstoken").toString(), json.get("appsecret").toString()).enableDebug(false);
+        AdAccount adAccount = new AdAccount("act_" + json.get("adacctid"), context);
         String campaignList = adAccount.getCampaigns().requestNameField().execute().toString();
         String adSetList = adAccount.getAdSets().requestNameField().execute().toString();
-        String campaignName = paramMap.get("ngo")  + " - SM";
+        String campaignName = json.get("ngo")  + " - SM";
 
-        Map<String, String> ids = getIds(campaignList, adSetList, campaignName, paramMap.get("adsetname"));
+        Map<String, String> ids = getIds(campaignList, adSetList, campaignName, json.get("adsetname").toString());
 
         //Check to see if we need to initialize an ad campaign
         if(!campaignList.contains(campaignName)) {
@@ -56,37 +58,37 @@ public class Controller {
         }
 
         //Check to see if we need to initialize a new adSet based on adSetName
-        if(!adSetList.contains(paramMap.get("adsetname"))) {
+        if(!adSetList.contains(json.get("adsetname").toString())) {
             //Create AdSet
             AdSet adSet = adAccount.createAdSet()
                     .setBillingEvent(AdSet.EnumBillingEvent.VALUE_IMPRESSIONS)
                     .setOptimizationGoal(AdSet.EnumOptimizationGoal.VALUE_IMPRESSIONS)
-                    .setBidAmount(paramMap.get("bidamount"))
+                    .setBidAmount(json.get("bidamount").toString())
                     .setCampaignId(ids.get("campaignid"))
-                    .setName(paramMap.get("adsetname"))
-                    .setStartTime(paramMap.get("adsetstarttime"))
-                    .setEndTime(paramMap.get("adsetendtime"))
+                    .setName(json.get("adsetname").toString())
+                    .setStartTime(json.get("adsetstarttime").toString())
+                    .setEndTime(json.get("adsetendtime").toString())
                     .setTargeting(
                             new Targeting()
-                                    .setFieldCustomAudiences("[{id:" + paramMap.get("customaudienceid") + "}]")
+                                    .setFieldCustomAudiences("[{id:" + json.get("customaudienceid") + "}]")
                                     .setFieldPublisherPlatforms(Arrays.asList("messenger"))
                                     .setFieldMessengerPositions(Arrays.asList("sponsored_messages"))
                     )
                     .setStatus(AdSet.EnumStatus.VALUE_PAUSED)
-                    .setPromotedObject("{\"page_id\":\"" + paramMap.get("pageid") +"\"}")
+                    .setPromotedObject("{\"page_id\":\"" + json.get("pageid") +"\"}")
                     .execute();
             ids.put("adsetid", adSet.getId().toString());
         }
 
         //Do Creative
-        AdCreative creative = doCreative(adAccount, paramMap.get("pageid"), paramMap.get("adname"), paramMap.get("adtext"),
-                paramMap.get("adcardimage"), paramMap.get("adcardtitle"), paramMap.get("adcardsubtitle"),
-                paramMap.get("buttontext"), paramMap.get("buttonurl"));
+        AdCreative creative = doCreative(adAccount, json.get("pageid").toString(), json.get("adname").toString(), json.get("adtext").toString(),
+                json.get("adcardimage").toString(), json.get("adcardtitle").toString(), json.get("adcardsubtitle").toString(),
+                json.get("buttontext").toString(), json.get("buttonurl").toString());
 
         //Create Ad
         adAccount.createAd()
-                .setName(paramMap.get("adname"))
-                .setAdsetId(ids.get("adsetid"))
+                .setName(json.get("adname").toString())
+                .setAdsetId(ids.get("adsetid").toString())
                 .setCreative(creative)
                 .setStatus(Ad.EnumStatus.VALUE_ACTIVE)
                 .execute();
