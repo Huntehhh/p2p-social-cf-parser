@@ -1,7 +1,6 @@
 package com.example.demo;
 
 import com.facebook.ads.sdk.*;
-import com.sun.tools.sjavac.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
@@ -161,7 +160,7 @@ public class Controller {
             JSONObject jsonObject = new JSONObject(json);
             return jsonObject;
         }catch (JSONException err){
-            Log.debug("Error" + err.toString());
+            System.out.println("JSON EXCEPTION LOL!!!!!");
         }
         return null;
     }
