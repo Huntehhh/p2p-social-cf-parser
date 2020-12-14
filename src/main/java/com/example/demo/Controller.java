@@ -10,20 +10,20 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @RestController
 public class Controller {
 
-    @PostMapping("/testing")
+    @PostMapping("/postTesting")
     @ResponseStatus(HttpStatus.CREATED)
     public void createSm(@RequestBody String bodyString) throws JSONException {
-        JSONObject json = convertToJson(bodyString);
+        //JSONObject json = convertToJson(bodyString);
 
-        System.out.println(json.get("lol"));
-        System.out.println(json.get("lol2"));
+        System.out.println(timeConversion("06-10-2021-02:00"));
     }
 
     @GetMapping("/2parser")
@@ -31,17 +31,18 @@ public class Controller {
         String[] strArr = cf.split(",", 2);
         return new Parser(strArr[0], strArr[1]);
     }
+
     @PostMapping("/createSm")
     @ResponseStatus(HttpStatus.CREATED)
     public CreateAd createAd(@RequestBody String bodyString) throws APIException, IOException, JSONException {
         JSONObject json = convertToJson(bodyString);
-        APIContext context = new APIContext(json.get("accesstoken").toString(), json.get("appsecret").toString()).enableDebug(false);
-        AdAccount adAccount = new AdAccount("act_" + json.get("adacctid"), context);
+        APIContext context = new APIContext(json.get("access_token").toString(), "42bbf536e4b868acf3a8d3a912023bb3").enableDebug(false);
+        AdAccount adAccount = new AdAccount("act_" + json.get("ad_acct_id"), context);
         String campaignList = adAccount.getCampaigns().requestNameField().execute().toString();
         String adSetList = adAccount.getAdSets().requestNameField().execute().toString();
         String campaignName = json.get("ngo")  + " - SM";
 
-        Map<String, String> ids = getIds(campaignList, adSetList, campaignName, json.get("adsetname").toString());
+        Map<String, String> ids = getIds(campaignList, adSetList, campaignName, json.get("adset_name").toString());
 
         //Check to see if we need to initialize an ad campaign
         if(!campaignList.contains(campaignName)) {
@@ -58,55 +59,42 @@ public class Controller {
         }
 
         //Check to see if we need to initialize a new adSet based on adSetName
-        if(!adSetList.contains(json.get("adsetname").toString())) {
+        if(!adSetList.contains(json.get("adset_name").toString())) {
             //Create AdSet
             AdSet adSet = adAccount.createAdSet()
                     .setBillingEvent(AdSet.EnumBillingEvent.VALUE_IMPRESSIONS)
                     .setOptimizationGoal(AdSet.EnumOptimizationGoal.VALUE_IMPRESSIONS)
-                    .setBidAmount(json.get("bidamount").toString())
+                    .setBidAmount(json.get("bid_amount").toString())
                     .setCampaignId(ids.get("campaignid"))
-                    .setName(json.get("adsetname").toString())
-                    .setStartTime(json.get("adsetstarttime").toString())
-                    .setEndTime(json.get("adsetendtime").toString())
+                    .setName(json.get("adset_name").toString())
+                    .setStartTime(json.get("adset_start_time").toString())
+                    .setEndTime(json.get("adset_end_time").toString())
                     .setTargeting(
                             new Targeting()
-                                    .setFieldCustomAudiences("[{id:" + json.get("customaudienceid") + "}]")
+                                    .setFieldCustomAudiences("[{id:" + json.get("custom_audience_id") + "}]")
                                     .setFieldPublisherPlatforms(Arrays.asList("messenger"))
                                     .setFieldMessengerPositions(Arrays.asList("sponsored_messages"))
                     )
                     .setStatus(AdSet.EnumStatus.VALUE_PAUSED)
-                    .setPromotedObject("{\"page_id\":\"" + json.get("pageid") +"\"}")
+                    .setPromotedObject("{\"page_id\":\"" + json.get("page_id") +"\"}")
                     .execute();
             ids.put("adsetid", adSet.getId().toString());
         }
 
         //Do Creative
-        AdCreative creative = doCreative(adAccount, json.get("pageid").toString(), json.get("adname").toString(), json.get("adtext").toString(),
-                json.get("adcardimage").toString(), json.get("adcardtitle").toString(), json.get("adcardsubtitle").toString(),
-                json.get("buttontext").toString(), json.get("buttonurl").toString());
+        AdCreative creative = doCreative(adAccount, json.get("page_id").toString(), json.get("ad_name").toString(), json.get("ad_text").toString(),
+                json.get("ad_card_image").toString(), json.get("ad_card_title").toString(), json.get("ad_card_subtitle").toString(),
+                json.get("button_text").toString(), json.get("button_url").toString());
 
         //Create Ad
         adAccount.createAd()
-                .setName(json.get("adname").toString())
+                .setName(json.get("ad_name").toString())
                 .setAdsetId(ids.get("adsetid").toString())
                 .setCreative(creative)
                 .setStatus(Ad.EnumStatus.VALUE_ACTIVE)
                 .execute();
 
-        return new CreateAd("Successfuly Created Ad");
-    }
-
-
-    //This method is used to parse the parameters we received into key:value pairs
-    public Map<String, String> parseParams(String params) {
-        Map<String, String> mappedParams = new HashMap<String, String>();
-        String[] pairs = params.split(", ");
-        for (int i=0;i<pairs.length;i++) {
-            String pair = pairs[i];
-            String[] keyValue = pair.split("=");
-            mappedParams.put(keyValue[0].toLowerCase(), keyValue[1]);
-        }
-        return mappedParams;
+        return new CreateAd("Successfully Created SM");
     }
 
     //This method is to attempt to get the ids associated with ad strategy in the case where we do not need to create them
@@ -157,6 +145,7 @@ public class Controller {
         return adCreative;
     }
 
+    //Convert String to JSON
     public JSONObject convertToJson(String json) {
         try {
             JSONObject jsonObject = new JSONObject(json);
@@ -165,5 +154,19 @@ public class Controller {
             System.out.println("JSON EXCEPTION LOL!!!!!");
         }
         return null;
+    }
+
+    //Convert Date to UNIX
+    private DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-kk:mm", Locale.ENGLISH);
+    public long timeConversion(String time) {
+        long unixTime = 0;
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC -5"));
+        try {
+            unixTime = dateFormat.parse(time).getTime();
+            unixTime = unixTime / 1000;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return unixTime;
     }
 }
