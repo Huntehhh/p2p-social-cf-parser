@@ -36,6 +36,11 @@
 			<artifactId>facebook-java-business-sdk</artifactId>
 			<version>9.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20200518</version>
+		</dependency>
 	</dependencies>
 
 	<build>
