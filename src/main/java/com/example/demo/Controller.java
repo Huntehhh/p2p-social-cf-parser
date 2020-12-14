@@ -1,10 +1,6 @@
 package com.example.demo;
 
 import com.facebook.ads.sdk.*;
-import com.sun.tools.sjavac.Log;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
