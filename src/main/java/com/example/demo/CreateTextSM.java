@@ -30,7 +30,7 @@ public class CreateTextSM {
         String pageId = json.get("page_id").toString();
         String adAcctId = json.get("ad_acct_id").toString();
         String accessToken = json.get("access_token").toString();
-        String bidAmount = json.get("bid_amount").toString();
+        String bidAmount = json.get("bid_amount").toString() + "00";
         String adsetName = json.get("adset_name").toString();
         String customAudienceId = json.get("custom_audience_id").toString();
         String adName = json.get("ad_name").toString();
