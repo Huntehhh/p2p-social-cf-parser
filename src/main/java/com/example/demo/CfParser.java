@@ -29,8 +29,8 @@ public class CfParser {
 
     @GetMapping("/2parser")
     public String parser(@RequestParam(value = "cf") String cf) {
-        cf.replaceAll("-", ",");
-        String[] strArr = cf.split(",", 999);
+        String replaced = cf.replaceAll("-", ",");
+        String[] strArr = replaced.split(",", 999);
         int i = 1;
         JSONObject json = new JSONObject();
 
